@@ -1,5 +1,6 @@
 # Starfield Gameplay Options for UI
-Helper script to allow Starfield interface mods to reliably read custom Gameplay Options.
+
+AS3 helper script to allow Starfield UI mods to reliably read custom Gameplay Options.
 
 > This readme is also [on my site](https://pxcnet.xyz/Starfield/Resources/GPOUI/).
 
