@@ -14,6 +14,20 @@ Since there are a good amount of UI mods that I feel would greatly benefit from 
 
 I chose a [custom attribution license](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/blob/main/LICENSE) which basically just states you can use this in any project for any reason but you need to include attribution somewhere in your mod description (can just be my name in your credits list). I am pretty flexible on this to be honest, so if you feel strongly that you dont want to do that, please reach out to me and we can work it out.
 
+## Required Bethesda Scripts
+
+Since this relies on the framework BGS puts into menus that already access engine events, the following scripts __MUST__ be included in your UI file if they are not already:
+
+- CustomEvent.as _(Shared.AS3.Events.CustomEvent)_
+- BSUIDataManager.as _(Shared.AS3.Data.BSUIDataManager)_
+- BSUIEventDispatcherBackend.as _(Shared.AS3.Data.BSUIEventDispatcherBackend)_
+- FromClientDataEvent.as _(Shared.AS3.Data.FromClientDataEvent)_
+- TestProviderLoader.as _(Shared.AS3.Data.TestProviderLoader)_
+- UIDataFromClient.as _(Shared.AS3.Data.UIDataFromClient)_
+- UIDataShuttleConnector.as _(Shared.AS3.Data.UIDataShuttleConnector)_
+- UIDataShuttleTestConnector.as _(Shared.AS3.Data.UIDataShuttleTestConnector)_
+- UsesEventDispatcherBackend.as _(Shared.AS3.Data.UsesEventDispatcherBackend)_
+
 ## Methodology
 
 Basically this helper script allows you to initialize an array of data objects which stores Gameplay Options for your mod.
