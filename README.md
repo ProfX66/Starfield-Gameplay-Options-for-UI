@@ -1,11 +1,9 @@
 # Starfield Gameplay Options for UI
 Helper script to allow Starfield interface mods to reliably read custom Gameplay Options.
 
-> It is best to just clone this repo locally so you get this readme, the script file, and the demo mod files.
+> This readme is also [on my site](https://pxcnet.xyz/Starfield/Resources/GPOUI/).
 
-This readme is also [on my site](https://pxcnet.xyz/Starfield/Resources/GPOUI/).
-
-You can also download this from [Nexus](https://www.nexusmods.com/starfield/mods/17227).
+> You can also download this from [Nexus](https://www.nexusmods.com/starfield/mods/17227).
 
 ### License and Attribution
 
