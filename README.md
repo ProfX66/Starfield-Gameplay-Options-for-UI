@@ -3,7 +3,11 @@ Helper script to allow Starfield interface mods to reliably read custom Gameplay
 
 > It is best to just clone this repo locally so you get this readme, the script file, and the demo mod files.
 
-### License
+This readme is also [on my site](https://pxcnet.xyz/Starfield/Resources/GPOUI/).
+
+You can also download this from [Nexus](https://www.nexusmods.com/starfield/mods/17227).
+
+### License and Attribution
 
 I chose a [custom attribution license](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/blob/main/LICENSE) which basically just states you can use this in any project for any reason but you need to include attribution somewhere in your mod description (can just be my name in your credits list). I am pretty flexible on this to be honest, so if you feel strongly that you dont want to do that, please reach out to me and we can work it out.
 
@@ -113,7 +117,7 @@ private var pxGameplayOptions:PxGameplayOptions = new PxGameplayOptions();
 This will subscribe to the `PEOData` engine event and cache a data array of matching options.
 
 ```as
-pxGameplayOptions.Initialize("PXC GPOUI Demo",onPeoDataChange,true);
+pxGameplayOptions.Initialize("PXC GPOUI Demo", onPeoDataChange, true);
 ```
 
 This example is initializing it with `PXC GPOUI Demo` as the pattern, `onPeoDataChange` is an existing function for call back, `true` is enabling the description matching.
@@ -148,7 +152,7 @@ Here is a condenced version of what it looks like in the demo mods `DataSlateMen
 
 This basically just injects the PEO options string value into the dataslate named `PXC Gameplay Options Demo` so you can see the data easily.
 
-You will need to give yourself this dataslate if you are testing with this demo mod, just user the console `help pxc 4 book` command to find its ID.
+You will need to give yourself this dataslate if you are testing with this demo mod, just use the console command `help pxc 4 book` to find its ID.
 
 ```as
 package DataSlateMenu
@@ -213,7 +217,7 @@ Here are the two Gameplay Options in the demo mod.
 
 ![Description matching gameplay option description](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/blob/main/Images/DescriptionMatching2.png)
 
-#### Using name prefixes isntead
+#### Using name prefixes instead
 
 This is just a screenshot of the demo mod gameplay options but using the `Name` matching instead. I'm including this just so you can see what it would look like in the Gameplay Options screen and why I think `Description` matching is better.
 
@@ -224,8 +228,6 @@ This is just a screenshot of the demo mod gameplay options but using the `Name` 
 Here is a screenshot of the `PXC Gameplay Options Demo` dataslate from in game to show the data properly being read.
 
 > If using name prefixes it would look the same basically, so I'm just including the description matching screenshot
-
-> SHOW IMAGE HERE 
 
 ![In game dataslate showing the GPO data](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/blob/main/Images/Dataslate.jpg)
 
