@@ -213,15 +213,15 @@ Here are the two Gameplay Options in the demo mod.
 | Float Setting | Float | Uses float (numerical) values for its settings    |
 | Bool Setting  | Bool  | Uses boolean (true/false) values for its settings |
 
-![Description matching gameplay options](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/blob/main/Images/DescriptionMatching1.png)
+![Description matching gameplay options](images/DescriptionMatching1.png)
 
-![Description matching gameplay option description](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/blob/main/Images/DescriptionMatching2.png)
+![Description matching gameplay option description](images/DescriptionMatching2.png)
 
 #### Using name prefixes instead
 
 This is just a screenshot of the demo mod gameplay options but using the `Name` matching instead. I'm including this just so you can see what it would look like in the Gameplay Options screen and why I think `Description` matching is better.
 
-![Name matching gameplay options](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/blob/main/Images/NameMatching.png)
+![Name matching gameplay options](images/NameMatching.png)
 
 ### Dataslate Menu
 
@@ -229,7 +229,7 @@ Here is a screenshot of the `PXC Gameplay Options Demo` dataslate from in game t
 
 > If using name prefixes it would look the same basically, so I'm just including the description matching screenshot
 
-![In game dataslate showing the GPO data](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/blob/main/Images/Dataslate.jpg)
+![In game dataslate showing the GPO data](images/Dataslate.jpg)
 
 ## Another Example
 
