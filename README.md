@@ -1,6 +1,10 @@
 # Starfield Gameplay Options for UI
 
-AS3 helper script to allow Starfield UI mods to reliably read custom Gameplay Options.
+This is a ActionScript 3 helper script that I wrote for UI (interface) mods to easily interact with the Gameplay Options configuration system in Starfield (and potentially future BGS games).
+
+While developing Ammo HUD v4.0, I figured out how to not only read Gameplay Options but make it reliable and easy for any UI mod.
+
+Since there are a good amount of UI mods that I feel would greatly benefit from this, I wrote a drop-in framework script which makes it basically trivial to implement into any existing or future UI mod.
 
 > This readme is also [on my site](https://pxcnet.xyz/Starfield/Resources/GPOUI/).
 
