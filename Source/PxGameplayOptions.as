@@ -86,7 +86,7 @@ package PXC
         * @param sName: PEO setting name; Null safe.
         * @return Found matching object; null if setting not found.
         */
-        public function GetSettingObject(sName:String):Object
+        public function GetSettingObject(sName:String) : Object
         {
             if (this.IsNullOrEmpty(sName))
                 return null;
@@ -107,6 +107,18 @@ package PXC
         }
 
         /**
+        * Gets the uint value property from the individual data object that matches the passed name string.
+        *
+        * @param sName: PEO setting name; Null safe.
+        * @return Unsigned Integer value for the found object; 0 if setting not found.
+        */
+        public function GetSettingValueUInt(sName:String) : uint
+        {
+            var oSetting:Object = GetSettingObject(sName);
+            return (oSetting != null) ? oSetting.uValue : 0;
+        }
+
+        /**
         * Gets the int value property from the individual data object that matches the passed name string.
         *
         * @param sName: PEO setting name; Null safe.
@@ -116,6 +128,18 @@ package PXC
         {
             var oSetting:Object = GetSettingObject(sName);
             return (oSetting != null) ? oSetting.iValue : 0;
+        }
+
+        /**
+        * Gets the Number value property from the individual data object that matches the passed name string.
+        *
+        * @param sName: PEO setting name; Null safe.
+        * @return Number value for the found object; 0 if setting not found.
+        */
+        public function GetSettingValueNumber(sName:String) : Number
+        {
+            var oSetting:Object = GetSettingObject(sName);
+            return (oSetting != null) ? oSetting.nValue : 0;
         }
 
         /**
@@ -155,7 +179,7 @@ package PXC
         *
         * @return Formatted string of the data object array informatio and entries.
         */
-        override public function toString():String
+        override public function toString() : String
         {
             var sOutput:String = "";
             var i:int = 0;
@@ -180,7 +204,9 @@ package PXC
                 var oItem:Object = aData[i];
                 sOutput += "sName: " + oItem.sName + "\r\n";
                 sOutput += "sType: " + oItem.sType + "\r\n";
+                sOutput += "uValue: " + oItem.uValue + "\r\n";
                 sOutput += "iValue: " + oItem.iValue + "\r\n";
+                sOutput += "nValue: " + oItem.nValue.toFixed(2) + "\r\n";
                 sOutput += "sValue: " + oItem.sValue + "\r\n";
                 sOutput += "bValue: " + oItem.bValue + "\r\n";
                 sOutput += "--------------------\r\n\r\n";
@@ -231,16 +257,21 @@ package PXC
                 return;
 
             bHasReceivedValidData = true;
-            var sName:String = oInput.sText;
-            var iValue:int = int(oInput.stepperData.uIndex);
-            var sValue:String = oInput.stepperData.aStepperOptions[oInput.stepperData.uIndex];
+            //var sName:String = oInput.sText;
+            var sName:String = bMatchDescription ? oInput.sText : this.Trim(this.RegexReplace(oInput.sText, sPattern));
+            var uValue:uint = oInput.stepperData.uIndex;
+            var iValue:int = int(uValue);
+            var nValue:Number = Number(uValue);
+            var sValue:String = oInput.stepperData.aStepperOptions[uValue];
             var bValue:Boolean = oInput.checkBoxData.bChecked;
             var sType:String = "Float";
 
             if (oInput.uType == 3)
             {
                 sType = "Bool";
+                uValue = bValue ? 1 : 0;
                 iValue = bValue ? 1 : 0;
+                nValue = bValue ? 1 : 0;
                 sValue = bValue ? oInput.checkBoxData.bOnCustomText : oInput.checkBoxData.bOffCustomText;
             }
 
@@ -248,7 +279,9 @@ package PXC
             if (oExisting != null)
             {
                 oExisting.sType = sType;
+                oExisting.uValue = uValue;
                 oExisting.iValue = iValue;
+                oExisting.nValue = nValue;
                 oExisting.sValue = sValue;
                 oExisting.bValue = bValue;
             }
@@ -257,7 +290,9 @@ package PXC
                 oExisting = {
                     sName: sName,
                     sType: sType,
+                    uValue: uValue,
                     iValue: iValue,
+                    nValue: nValue,
                     sValue: sValue,
                     bValue: bValue
                 };
@@ -277,9 +312,23 @@ package PXC
         * @param sValue: String to validate.
         * @return True if null or empty; False if not.
         */
-        private function IsNullOrEmpty(sValue:String):Boolean
+        private function IsNullOrEmpty(sValue:String) : Boolean
         {
             return sValue == null || sValue.length == 0;
+        }
+
+        /**
+        * Trims whitespace on both sides of the passed string
+        *
+        * @param sValue: String to trim; Null safe.
+        * @return Trimmed string.
+        */
+        private function Trim(sValue:String) : String
+        {
+            if(this.IsNullOrEmpty(sValue))
+                return null;
+
+            return sValue.replace(/^\s+|\s+$/g, "");
         }
 
         /**
@@ -288,7 +337,7 @@ package PXC
         * @param sValue: String to escape; Null safe.
         * @return string with Regex operators escaped.
         */
-        private function RegexEscape(sValue:String):String
+        private function RegexEscape(sValue:String) : String
         {
             if(this.IsNullOrEmpty(sValue))
                 return null;
@@ -301,9 +350,32 @@ package PXC
         *
         * @param sValue: String to match against; Null safe.
         * @param sPattern: RegEx pattern; Null safe.
+        * @param sReplacement: RegEx pattern; Null allowed.
+        * @param bGlobal: RegEx flag to replace all matches; Default is false.
+        * @param bIgnoreCase: RegEx flag to ignore case; Default is false.
+        * @param bMultiline: RegEx flag to match multiple lines; Default is false.
+        * @return Replaced string value.
+        */
+        private function RegexReplace(sValue:String, sPattern:String, sReplacement:String = "", bGlobal:Boolean = true, bIgnoreCase:Boolean = false, bMultiline:Boolean = false) : String
+        {
+            if(this.IsNullOrEmpty(sValue) || this.IsNullOrEmpty(sPattern))
+                return sValue;
+
+            var sFlags:String = "";
+            if (bGlobal) sFlags += "g";
+            if (bIgnoreCase) sFlags += "i";
+            if (bMultiline) sFlags += "m";
+            return sValue.replace(new RegExp(sPattern, sFlags), sReplacement);
+        }
+
+        /**
+        * Performes a regex match for the passed value and pattern.
+        *
+        * @param sValue: String to match against; Null safe.
+        * @param sPattern: RegEx pattern; Null safe.
         * @return Boolean result of the regex match; False if input string and/or pattern are null or empty.
         */
-        private function IsRegexMatch(sValue:String, sPattern:String):Boolean
+        private function IsRegexMatch(sValue:String, sPattern:String) : Boolean
         {
             if(this.IsNullOrEmpty(sValue) || this.IsNullOrEmpty(sPattern))
                 return false;
