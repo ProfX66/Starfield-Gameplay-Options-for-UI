@@ -18,6 +18,7 @@ I chose a [custom attribution license](https://github.com/ProfX66/Starfield-Game
 
 Since this relies on the framework BGS puts into menus that already access engine events, the following scripts __MUST__ be included in your UI file if they are not already:
 
+- EnumHelper.as _(Shared.EnumHelper)_
 - CustomEvent.as _(Shared.AS3.Events.CustomEvent)_
 - BSUIDataManager.as _(Shared.AS3.Data.BSUIDataManager)_
 - BSUIEventDispatcherBackend.as _(Shared.AS3.Data.BSUIEventDispatcherBackend)_
@@ -42,6 +43,24 @@ You can use either the `Name` or the `Description` field to match against.
 
 The matching is done via Regular Expressions, so you can either pass your own complex Regex pattern or just provide the string you want to match and it will automatically get escaped for the pattern.
 
+There are three match types that you can use:
+
+| Type        | Description                                                        |
+| ----------- | ------------------------------------------------------------------ |
+| Name        | Matches a pattern in the `Name` of the gameplay option             |
+| Description | Matches a pattern in the `Description` of the gameplay option      |
+| Group       | Matches a pattern in the `Group Name` of the gameplay option group |
+
+These are passed to the `Initialize()` method via an integer parameter.
+
+The allowed values are stored in an enum (which is why EnumHelper is required).
+
+| Type        | Enum                                | Int Value |
+| ----------- | ----------------------------------- | --------- |
+| Name        | PxGameplayOptions.Match_Name        | 0         |
+| Description | PxGameplayOptions.Match_Description | 1         |
+| Group       | PxGameplayOptions.Match_Group       | 2         |
+
 #### Name Matching
 
 By default it will use the `Name` field for matching and it will replace the pattern for the `sName` property in the data object.
@@ -52,13 +71,27 @@ This means if your option name is `My Mod: Some Option` and you pass `My Mod:` a
 
 #### Description Matching
 
-If you enable `bMatchDescription` then it will match the pattern in the description instead.
+If you pass `PxGameplayOptions.Match_Description` then it will match the pattern in the description instead.
 
 This will not do any trimming or anything, it will take the option name as is.
 
 This allows you to "hide" the pattern in the description which makes the name look better in the menu.
 
-> Personally this is the better way to do it but I am not sure if everyone agrees which is why its optional
+> Personally this is a better method than using the name, but Group is the best provided you are using a group.
+
+#### Group Matching
+
+If you pass `PxGameplayOptions.Match_Group` then it will match the pattern in the your GPO group instead.
+
+> **IMPORTANT:** If you are using this, you **MUST** create the gameplay option group in your mod, if you dont then it will never match anything and always return null.
+
+Unfortunately gameplay option groups just show up as another gameplay option in the array of objects, BGS didnt make the group a property of the gameplay option objects which means the only way to parse the list at all is to iterate over the array.
+
+Since groups always preceeed the options in that group in the array, it basically matches the group and adds each option after that to the data object until it reaches the next group that doesnt match the pattern.
+
+This means you can use multiple groups, but each one would need to match the pattern you provide.
+
+> This means you dont have to prefix the names or hide a pattern in your description, which is the cleanest method.
 
 ### Callback Function
 
@@ -105,18 +138,18 @@ I normally do this either in the constructor or the `ADDED_TO_STAGE` event.
 
 There are a few parameters, only one of them is required, the rest are optional.
 
-| Parameter           | Default | Description                                                               |
-| ------------------- | ------- | ------------------------------------------------------------------------- |
-| sPattern __(*)__    | Null    | This is the pattern to look for in the PEO settings. Must not be null.    |
-| fCallBack           | Null    | Function to call on PEO data update. Ignored when null.                   |
-| bMatchDescription   | False   | Perform the pattern match on the description instead of name              |
-| bIsRegexPattern     | False   | Treat the pattern as a regex pattern already, do not escape it for regex. |
+| Parameter           | Default        | Description                                                                     |
+| ------------------- | -------------- | ------------------------------------------------------------------------------- |
+| sPattern __(*)__  | Null           | This is the pattern to look for in the PEO settings. Must not be null.          |
+| fCallBack           | Null           | Function to call on PEO data update. Ignored when null.                         |
+| iMatchType          | Match_Name (0) | Which match type to use: Match_Name (0), Match_Description (1), Match_Group (2) |
+| bIsRegexPattern     | False          | Treat the pattern as a regex pattern already, do not escape it for regex.       |
 
 > __(*)__ = Required
 
 ## Adding to your project
 
-> This section will use data from the 'Demo Mod' so its easy to follow
+> This section will use data from the 'Description Matching Demo Mod' so its easy to follow
 
 1. Download the script: [Source/PxGameplayOptions.as](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/blob/main/Source/PxGameplayOptions.as)
 2. Add `PXC.PxGameplayOptions` to your projects scripts
@@ -134,10 +167,10 @@ private var pxGameplayOptions:PxGameplayOptions = new PxGameplayOptions();
 This will subscribe to the `PEOData` engine event and cache a data array of matching options.
 
 ```as
-pxGameplayOptions.Initialize("PXC GPOUI Demo", onPeoDataChange, true);
+pxGameplayOptions.Initialize("PXC GPOUI Demo", onPeoDataChange, PxGameplayOptions.Match_Description);
 ```
 
-This example is initializing it with `PXC GPOUI Demo` as the pattern, `onPeoDataChange` is an existing function for call back, `true` is enabling the description matching.
+This example is initializing it with `PXC GPOUI Demo` as the pattern, `onPeoDataChange` is an existing function for call back, `PxGameplayOptions.Match_Description` to use description matching.
 
 ### Callback
 
@@ -157,11 +190,17 @@ private function onPeoDataChange() : *
 }
 ```
 
-## Demo Mod
+## Demo Mods
 
-I created a demo mod with two Gameplay Options (one of each type) and I added my script to the `dataslatemenu.swf` interface file and edited the `DataSlateMenu.as` script to allow me to show a basic example of how to access the data in an easy visual way.
+I created a few demo mods with two Gameplay Options (one of each type) and I added my script to the `dataslatemenu.swf` interface file and edited the `DataSlateMenu.as` script to allow me to show a basic example of how to access the data in an easy visual way.
 
-[Availalbe here](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/tree/main/Demo%20Mod)
+These are pretty self-explanatory but here is a table explaining them with links to each folder:
+
+| Demo Mod             | Description                         |
+| -------------------- | ----------------------------------- |
+| [Name Matching](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/tree/main/Demo%20Mods/Name%20Matching)        | Uses the name prefix method         |
+| [Description Matching](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/tree/main/Demo%20Mods/Description%20Matching) | Uses the description pattern method |
+| [Group Matching](https://github.com/ProfX66/Starfield-Gameplay-Options-for-UI/tree/main/Demo%20Mods/Group%20Matching)       | Uses the group matching method      |
 
 ### Script Example
 
@@ -186,7 +225,7 @@ package DataSlateMenu
       public function DataSlateMenu()
       {
          super();
-         pxGameplayOptions.Initialize("PXC GPOUI Demo", onPeoDataChange, true);
+         pxGameplayOptions.Initialize("PXC GPOUI Demo", onPeoDataChange, PxGameplayOptions.Match_Description);
          //.....
       }
       
@@ -240,11 +279,15 @@ This is just a screenshot of the demo mod gameplay options but using the `Name` 
 
 ![Name matching gameplay options](https://pxcnet.xyz/Starfield/Resources/images/GPOUI_NameMatching.png)
 
+#### Group Matching
+
+I am not going to provide an image for this, it looks the exact same as the above images just with out the need for a name prefix or a pattern in the description.
+
 ### Dataslate Menu
 
 Here is a screenshot of the `PXC Gameplay Options Demo` dataslate from in game to show the data properly being read.
 
-> If using name prefixes it would look the same basically, so I'm just including the description matching screenshot
+> If using name prefixes or group matching it would look the same basically, so I'm just including the description matching screenshot
 
 ![In game dataslate showing the GPO data](https://pxcnet.xyz/Starfield/Resources/images/GPOUI_Dataslate.jpg)
 

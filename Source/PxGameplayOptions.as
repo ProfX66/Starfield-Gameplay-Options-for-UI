@@ -7,6 +7,7 @@ package PXC
 {
     import Shared.AS3.Data.BSUIDataManager;
     import Shared.AS3.Data.FromClientDataEvent;
+    import Shared.EnumHelper;
 
     public class PxGameplayOptions
     {
@@ -14,10 +15,13 @@ package PXC
         // Properties
         // ----------------------------------------------------------------------------------------------------
 
-        public static const sVersion:String = "1.0.0";
+        public static const sVersion:String = "1.1.0";
+        public static const Match_Name:int = EnumHelper.GetEnum(0);
+        public static const Match_Description:int = EnumHelper.GetEnum();
+        public static const Match_Group:int = EnumHelper.GetEnum();
         public var onDataChange:Function = null;
         private var sPattern:String;
-        private var bMatchDescription:Boolean = false;
+        private var iMatchType:int = Match_Name;
         private var bInitialized:Boolean = false;
         private var bHasReceivedValidData:Boolean = false;
         private var aDataMap:Object = {};
@@ -40,10 +44,10 @@ package PXC
         *
         * @param sPattern: String pattern to find in the PEO settings for this mod; Must not be null.
         * @param fCallBack: Function to call on data update; Ignored if null.
-        * @param bMatchDescription: Pattern match the PEO entry description instead of name; Default is False.
+        * @param iMatchType: What to match for your options; Allowed values: Match_Name (0) [Default], Match_Description (1), Match_Group (2)
         * @param bIsRegexPattern: Pattern string is a RegEx pattern and do not escape it; Default is False.
         */
-        public function Initialize(sPattern:String, fCallBack:Function, bMatchDescription:Boolean = false, bIsRegexPattern:Boolean = false) : void
+        public function Initialize(sPattern:String, fCallBack:Function, iMatchType:int = 0, bIsRegexPattern:Boolean = false) : void
         {
             if (this.IsNullOrEmpty(sPattern))
             {
@@ -55,8 +59,16 @@ package PXC
                 return;
             
             this.sPattern = bIsRegexPattern ? this.RegexEscape(sPattern) : sPattern;
-            this.bMatchDescription = bMatchDescription;
             this.onDataChange = fCallBack;
+            if (iMatchType > 2)
+            {
+                this.iMatchType = 0;
+            }
+            else
+            {
+                this.iMatchType = iMatchType;
+            }
+            
             BSUIDataManager.Subscribe("PEOData",this.OnPEODataUpdate);
             BSUIDataManager.dispatchCustomEvent("SettingsPanel_OpenCategory",{"categoryID":0});
             trace("[PxGameplayOptions:Initialize] Pattern: " + sPattern);
@@ -187,15 +199,22 @@ package PXC
             sOutput += "\r\n[Gameplay Options]\r\n";
             sOutput += "Pattern: " + sPattern + "\r\n";
 
-            if (bMatchDescription)
+            switch (iMatchType)
             {
-                sOutput += "Match Property: Description\r\n";
+                case Match_Name:
+                    sOutput += "Match Type: Setting Name\r\n";
+                    break;
+                case Match_Description:
+                    sOutput += "Match Type: Description\r\n";
+                    break;
+                case Match_Group:
+                    sOutput += "Match Type: Group\r\n";
+                    break;
+                default:
+                    sOutput += "Match Type: Unknown\r\n";
+                    break;
             }
-            else
-            {
-                sOutput += "Match Property: Setting Name\r\n";
-            }
-            
+
             sOutput += "Matching Options: " + aData.length + "\r\n";
             sOutput += "\r\n====================\r\n\r\n";
 
@@ -232,9 +251,36 @@ package PXC
 
             var iIndex:int = 0;
             var aList:Array = oFromClient.data.aGeneralSettingsList;
+            var sMatchedGroup:String = null;
             while (iIndex < aList.length)
             {
-                this.ResolvePEOItem(aList[iIndex]);
+                var oEntry:Object = aList[iIndex];
+                if (iMatchType == Match_Group)
+                {
+                    if (oEntry.uType == 5)
+                    {
+                        if (this.IsRegexMatch(oEntry.sText, sPattern))
+                        {
+                            sMatchedGroup = oEntry.sText;
+                        }
+                        else
+                        {
+                            sMatchedGroup = null;
+                        }
+                    }
+                    else
+                    {
+                        if (!this.IsNullOrEmpty(sMatchedGroup))
+                            this.ResolvePEOItem(oEntry);
+                    }
+                }
+                else
+                {
+                    var sMatchItem:String = iMatchType == Match_Description ? oEntry.sDescription : oEntry.sText;
+                    if (this.IsRegexMatch(sMatchItem, sPattern))
+                        this.ResolvePEOItem(oEntry);
+                }
+
                 iIndex++;
             }
 
@@ -252,13 +298,8 @@ package PXC
             if (oInput == null || this.IsNullOrEmpty(oInput.sText))
                 return;
 
-            var sMatchItem:String = bMatchDescription ? oInput.sDescription : oInput.sText;
-            if (!this.IsRegexMatch(sMatchItem, sPattern))
-                return;
-
             bHasReceivedValidData = true;
-            //var sName:String = oInput.sText;
-            var sName:String = bMatchDescription ? oInput.sText : this.Trim(this.RegexReplace(oInput.sText, sPattern));
+            var sName:String = iMatchType == Match_Name ? this.Trim(this.RegexReplace(oInput.sText, sPattern)) : oInput.sText;
             var uValue:uint = oInput.stepperData.uIndex;
             var iValue:int = int(uValue);
             var nValue:Number = Number(uValue);
